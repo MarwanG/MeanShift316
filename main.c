@@ -23,7 +23,7 @@ int main( int argc, char **argv) {
   struct pt_x * tabPt_x;
 
   float hr , hs;
-  hr = 8;
+  hr = 5;
   hs = 8;
   /* Initialisation */
   inr_init( argc, argv, version, usage, detail);
@@ -37,7 +37,7 @@ int main( int argc, char **argv) {
   nf = image_(fname, "e", "", lfmt);
 
   /* verification du format */
-  if((TYPE == FIXE && BSIZE==1)){
+  if((TYPE == FIXE && BSIZE==1 && NDIMV == 1)){
     
   /* allocation memoire adequat */
 
@@ -56,14 +56,14 @@ int main( int argc, char **argv) {
   }else if (NDIMV == 3){
 
     printf("photo color rgb \n");
-    tabPt_x = malloc(NDIMX*NDIMY*sizeof(pt_x));
+    tabPt_x = malloc(NDIMX*NDIMY* NDIMV *sizeof(pt_x));
    
     buf = (unsigned char*)i_malloc( NDIMX * NDIMY* NDIMV *sizeof(unsigned char));  
     
      /* lecture image */
     c_lect( nf, NDIMY, buf);
 
-    remplir_rgb(buf,tabPt_x,255);
+    remplir_rgb(buf,tabPt_x,NDIMX,NDIMY);
 
   }else{
     imerror( 6, "codage non conforme\n");
@@ -72,22 +72,19 @@ int main( int argc, char **argv) {
  
 
   /* Affichage de tableau */
+  
   //affiche_tab(tabPt_x,NDIMX,NDIMY);
 
   
-  //calcul de mean shift
-  //res = mean_shift(tabPt_x , tabPt_x[i] , 8 , 5 , 6000 ,1 , NDIMX , NDIMY);
-  //printf("value of res %f , %f , %f\n", res->i, res->j, res->r); 
-  
   /*debruit*/
-
   buf2 = (unsigned char*)i_malloc( NDIMX * NDIMY*NDIMV*sizeof(unsigned char));
-  debruit_basic(tabPt_x,buf2,hs,hr,1000,1 , NDIMX , NDIMY);
 
-  //remplir_basic(buf2,tabPt_x,256);
-  //affiche_tab(tabPt_x,256);
-
-  //printf("kakaka \n");
+  if(NDIMV == 1){
+    debruit_basic(tabPt_x,buf2,hs,hr,1000,1,NDIMX,NDIMY);
+  }else{
+    debruit_rgb(tabPt_x,buf2,hs,hr,10,10,NDIMX,NDIMY);
+  }
+ 
 
   /*sauvgarde*/
   outfileopt(nom);

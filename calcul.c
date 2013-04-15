@@ -71,26 +71,48 @@ int noyau_global(float i,float j , float r , float g , float b , float hs , floa
 
 /* NOYAU GAUSSIEN */
 
-float noyau_gauss(float i , float j , float h){
+float noyau_gaussCoord(float i , float j , float hs){
 	float iCarre , jCarre ;
 	float hCarre;
 	float res;
 	double norm;
 	iCarre = i * i;
 	jCarre = j * j;
-	norm  = pow((iCarre + jCarre),2);
-	hCarre= pow(h,2);
+	norm  = sqrt(iCarre + jCarre);
+	hCarre= pow(hs,2);
 	res = -0.5 * (norm/hCarre);
-	res = exp(res) * -(1/2*h);
+	//fprintf(stderr, "before exp %f\n",res);
+	res = exp(res);
+	//fprintf(stderr, "after exp %f\n",res);
+	res = res * -0.5 * hs;
+	//fprintf(stderr, "after 0.5 hs %f\n", res);
 	return res;
 }
 
+float noyau_gaussRgb(float r , float g , float b , float hr){
+	float rCarre , gCarre , bCarre;
+	float hCarre;
+	float res;
+	double norm;
+	rCarre = pow(r,2);
+	gCarre = pow(g,2);
+	bCarre = pow(b,2);
+	norm  = sqrt(rCarre + bCarre + gCarre);
+	hCarre = pow(hr,2);
+	res = -0.5 * (norm/hCarre);
+	//fprintf(stderr, "before exp %f\n",res);
+	res = exp(res);
+	//fprintf(stderr, "after exp %f\n",res);
+	res = res * -0.5 * hr;
+	//fprintf(stderr, "after 0.5 hs %f\n", res);
+	return res;
+}
 
 /* FONCTIONS FOR CALCULATIONS */
 
 
 int moduloPt(struct pt_x ptX1 , struct pt_x ptX2){
-	int res = sqrt(pow(ptX2.i - ptX1.i,2)+pow(ptX2.j - ptX1.j,2));
+	int res = sqrt(pow(ptX2.i - ptX1.i,2)+pow(ptX2.j - ptX1.j,2)+pow(ptX2.r - ptX1.r,2)+pow(ptX2.g - ptX1.g,2) + pow(ptX2.b - ptX1.b,2));
  	return res;
 }
 

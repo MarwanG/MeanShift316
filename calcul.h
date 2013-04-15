@@ -38,7 +38,9 @@ int noyau_rgb(float r , float g , float b , float hr);
 int noyau_global(float i,float j , float r , float g , float b , float hs , float hr);
 
 
-float noyau_gauss(float i , float j , float h);
+float noyau_gaussCoord(float i , float j , float hs);
+
+float noyau_gaussRgb(float r , float g , float b , float hr);
 
 /* puts the difference between pixel ptX2 and ptX1 into pixel pt */
 
