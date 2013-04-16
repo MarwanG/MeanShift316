@@ -82,7 +82,11 @@ int main( int argc, char **argv) {
   if(NDIMV == 1){
     debruit_basic(tabPt_x,buf2,hs,hr,1000,1,NDIMX,NDIMY);
   }else{
+<<<<<<< HEAD
     debruit_rgb(tabPt_x,buf2,hs,hr,10,10,NDIMX,NDIMY);
+=======
+    debruit_rgb(tabPt_x,buf2,hs,hr,1000,10,NDIMX,NDIMY);
+>>>>>>> debruit not so sure
   }
  
 

@@ -59,6 +59,7 @@ void remplir_rgb(unsigned char *buf , struct pt_x* tabPt_x , int x , int y){
 	fprintf(stderr,"fin de remplir_rgb \n");
 }
 
+<<<<<<< HEAD
 void remplir_rgbSeg(unsigned char *buf, pt_x* tabPt_x ,int centerX , int centerY){
 	int [9][9] indice;
 	int i,j;
@@ -71,6 +72,8 @@ void remplir_rgbSeg(unsigned char *buf, pt_x* tabPt_x ,int centerX , int centerY
 }
 
 
+=======
+>>>>>>> debruit not so sure
 void setPixel(pt_x *pt , int i , int j , int r , int g , int b){
 	pt->i = i;
 	pt->j = j;
@@ -99,6 +102,7 @@ struct pt_x * mean_shift(struct pt_x tabPt_x[] , struct pt_x centre , float hs ,
 		setPixel(sum,0,0,0,0,0);
 		setPixel(mult,0,0,0,0,0);
 		for(i = 0 ; i < sizeX*sizeY ; i++){
+<<<<<<< HEAD
 			noyau = noyau_coord(y->i - tabPt_x[i].i , y->j - tabPt_x[i].j ,hs);
 			//fprintf(stderr, "noyauCoord = %f\n",noyau);			
 			if(noyau != 0){				
@@ -106,6 +110,15 @@ struct pt_x * mean_shift(struct pt_x tabPt_x[] , struct pt_x centre , float hs ,
 				div = div + noyau;																						// CALCULATE THE DOMINATOR
 				mult_pt(tabPt_x[i],noyau,mult);																			//MULT DE IEME PIXEL WITH NOYAU
 				sum_pt(*mult,sum,sum);																					//ADDITION
+=======
+
+			if( noyau_coord(y->i - tabPt_x[i].i , y->j - tabPt_x[i].j ,hs) == 1 ){			//TEST IF EQUAL TO 1 SINCE IF EQUAL TO 0 THEN USELESS
+				
+				noyau = -1 * noyau_rgb(y->r - tabPt_x[i].r , y->g - tabPt_x[i].g , y->b - tabPt_x[i].b , hr);	//CALCULATE REST OF NOYAU		
+				div = div + noyau;															// CALCULATE THE DOMINATOR
+				mult_pt(tabPt_x[i],noyau,mult);												//MULT DE IEME PIXEL WITH NOYAU
+				sum_pt(*mult,sum,sum);														//ADDITION
+>>>>>>> debruit not so sure
 			}
 		}
 		div_pt(*sum,div,&tmp);
@@ -163,6 +176,7 @@ void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr 
 
 	for(i = 0 ; i < sizeX*sizeY ; i++){
 		tmp = mean_shift(tabPt_x,tabPt_x[i],hs,hr,maxIter,s,sizeX,sizeY);
+<<<<<<< HEAD
 		//fprintf(stderr,"values  r = %f g =  %f b = %f\n",tmp->r,tmp->g,tmp->b);
 
 		x++;
@@ -171,6 +185,13 @@ void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr 
 		buf[j+2] = tmp->b;
 		//printf("%f %f %f \n", buf[j] , buf[j+1] , buf[j+2]);
 		x++;
+=======
+		buf[j] = tmp->r;
+		buf[j+1] = tmp->g;
+		buf[j+2] = tmp->b;
+		x++;
+
+>>>>>>> debruit not so sure
 		if(i%sizeX == 0){				// to verifie
 			fprintf(stderr, "i = %d\n", i);
     	}
@@ -178,11 +199,14 @@ void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr 
 	}
 	fprintf(stderr,"fin de debruit_rgb \n");
 }
+<<<<<<< HEAD
 
 
 /*
 NEED TO BE FINISHED
 */
+=======
+>>>>>>> debruit not so sure
 
 void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr ,int maxIter , int s , int sizeX , int sizeY){
 	
