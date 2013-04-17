@@ -23,8 +23,8 @@ int main( int argc, char **argv) {
   struct pt_x * tabPt_x;
 
   float hr , hs;
-  hr = 5;
-  hs = 8;
+  hr = 8;
+  hs = 5;
   /* Initialisation */
   inr_init( argc, argv, version, usage, detail);
 
@@ -33,11 +33,13 @@ int main( int argc, char **argv) {
   igetopt1("-hs", "%f", &hs);
   igetopt1("-hr", "%f", &hr);
 
+  fprintf(stderr, "values = %f %f\n",hs,hr);
+
   /* Ouverture et lecture des images */
   nf = image_(fname, "e", "", lfmt);
 
   /* verification du format */
-  if((TYPE == FIXE && BSIZE==1 && NDIMV == 1)){
+  if(TYPE == FIXE && BSIZE==1){
     
   /* allocation memoire adequat */
 
@@ -50,57 +52,43 @@ int main( int argc, char **argv) {
   /* lecture image */
     c_lect( nf, NDIMY, buf);
 
-  /* Traitement */
-    remplir_basic(buf,tabPt_x,NDIMX,NDIMY);
-  
-  }else if (NDIMV == 3){
-
-    printf("photo color rgb \n");
-    tabPt_x = malloc(NDIMX*NDIMY* NDIMV *sizeof(pt_x));
-   
-    buf = (unsigned char*)i_malloc( NDIMX * NDIMY* NDIMV *sizeof(unsigned char));  
-    
-     /* lecture image */
-    c_lect( nf, NDIMY, buf);
-
-    remplir_rgb(buf,tabPt_x,NDIMX,NDIMY);
-
   }else{
     imerror( 6, "codage non conforme\n");
   }
   
- 
-
-  /* Affichage de tableau */
+  /* Remplir de Struct Special */
   
-  //affiche_tab(tabPt_x,NDIMX,NDIMY);
+  if(NDIMV == 1){
+    remplir_basic(buf,tabPt_x,NDIMX,NDIMY);
+  }
+  if(NDIMV == 3){
+    remplir_rgb(buf,tabPt_x,NDIMX,NDIMY);
+  }
 
+
+  /* Traitement */
   
+
   /*debruit*/
   buf2 = (unsigned char*)i_malloc( NDIMX * NDIMY*NDIMV*sizeof(unsigned char));
 
   if(NDIMV == 1){
     debruit_basic(tabPt_x,buf2,hs,hr,1000,1,NDIMX,NDIMY);
   }else{
-<<<<<<< HEAD
-    debruit_rgb(tabPt_x,buf2,hs,hr,10,10,NDIMX,NDIMY);
-=======
-    debruit_rgb(tabPt_x,buf2,hs,hr,1000,10,NDIMX,NDIMY);
->>>>>>> debruit not so sure
+    debruit_rgb(tabPt_x,buf2,hs,hr,1000,1,NDIMX,NDIMY);
   }
- 
 
   /*sauvgarde*/
+  
   outfileopt(nom);
   nf = c_image(nom,"c","",lfmt);
   c_ecr(nf,DIMY,buf2);
 
-  /* fermeture image */
+    /* fermeture image */
   fermnf_( &nf);
-  
 
 
-  i_Free((void*)&buf);
+ // i_Free((void*)&buf);
   i_Free((void*)&buf2);
   return 0;
 }

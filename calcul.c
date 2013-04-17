@@ -157,3 +157,10 @@ void div_pt(struct pt_x ptX1 , float div , struct pt_x *pt){
 
 }
 
+int distanceEuc(int centrei , int centrej,pt_x ptX2){
+	float x = pow(centrei - ptX2.i,2);
+	float y = pow(centrej - ptX2.j,2);
+	printf("%d - %f = %f \n",centrej , ptX2.j ,centrej - ptX2.j);
+	return sqrt(pow(centrei - ptX2.i,2)+pow(centrej - ptX2.j,2));
+}
+
