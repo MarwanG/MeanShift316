@@ -164,3 +164,12 @@ int distanceEuc(int centrei , int centrej,pt_x ptX2){
 	return sqrt(pow(centrei - ptX2.i,2)+pow(centrej - ptX2.j,2));
 }
 
+
+float distancePointsCoord(pt_x ptX1 , pt_x ptX2){
+	return sqrt(pow(ptX1.i - ptX2.i,2) + pow(ptX1.j - ptX2.j,2));
+}
+
+
+float distancePointsRgb(pt_x ptX1 , pt_x ptX2){
+	return sqrt(pow(ptX1.r - ptX2.r,2) + pow(ptX1.b - ptX2.b,2) + pow(ptX1.g - ptX2.g,2));
+}

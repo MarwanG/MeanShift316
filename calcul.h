@@ -55,3 +55,9 @@ void mult_pt(struct pt_x ptX1 , float i , struct pt_x *pt);
 
 void div_pt(struct pt_x ptX1 , float i , struct pt_x *pt);
 
+int distanceEuc(int centrei , int centrej,pt_x ptX2);
+
+float distancePointsCoord(pt_x ptX1 , pt_x ptX2);
+
+float distancePointsRgb(pt_x ptX1 , pt_x ptX2);
+

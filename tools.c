@@ -6,6 +6,7 @@
 
 
 
+
 /**
 * Fills table of pt_x with buf of an image 256 levels of grey.
 * @param buf buffered used to filled
@@ -139,13 +140,13 @@ struct pt_x * mean_shift(struct pt_x tabPt_x[] , struct pt_x centre , float hs ,
 }
 
 
-void getVoisinage(pt_x tabPt_x[] ,int indice, pt_x tabPt_x2[] , int sizeX , int sizeY){
+void getVoisinage(pt_x tabPt_x[] ,int indice, pt_x tabPt_x2[] , int rang , int sizeX , int sizeY){
   int i,j;
-  int ix = tabPt_x[indice].i - 2;
-  int iy = tabPt_x[indice].j - 2;
+  int ix = tabPt_x[indice].i - rang;
+  int iy = tabPt_x[indice].j - rang;
   int ll = 0;
-  for(j = iy ; j <= tabPt_x[indice].j + 2 ; j++){
-    for(i = ix ; i  <= tabPt_x[indice].i + 2  ; i++){
+  for(j = iy ; j <= tabPt_x[indice].j + rang ; j++){
+    for(i = ix ; i  <= tabPt_x[indice].i + rang  ; i++){
       int index = (j * sizeX) + i;
       if(index < 0 || index >= sizeX * sizeY)
       	tabPt_x2[ll] = tabPt_x[indice];
@@ -184,6 +185,7 @@ void debruit_basic(struct pt_x* tabPt_x , unsigned char *buf , float hs , float 
 
 void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr , int maxIter , int s , int sizeX , int sizeY){
 	fprintf(stderr,"debruit_rgb \n");
+	
 	struct pt_x *tmp , *tmp2;
 	int i , tmpi , tmpj;
 	int x , y , j ,k;
@@ -191,35 +193,70 @@ void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr 
 	y = 0;
 	j = 0;
 	k=0;
-	tmp2 = malloc(25 *sizeof(pt_x));
+	tmp2 = malloc(7*7 *sizeof(pt_x));
 	for(i = 0; i < sizeX*sizeY  ; i++){
-		getVoisinage(tabPt_x,i,tmp2,sizeX,sizeY);
-		tmp = mean_shift(tmp2,tabPt_x[i],hs,hr,maxIter,s,5,5);	
-		//printf("i = %d\n",i);
-		buf[(3 * k)]   = tmp->r;
-		buf[(3 * k)+1] = tmp->g;
-		buf[(3 * k)+2] = tmp->b;
+		getVoisinage(tabPt_x,i,tmp2,3,sizeX,sizeY);
+		tmp = mean_shift(tmp2,tabPt_x[i],hs,hr,maxIter,s,5,5);
+		buf[(3 * k)]   = (unsigned char)tmp->r;	
+		buf[(3 * k)+1] = (unsigned char)tmp->g;
+		buf[(3 * k)+2] = (unsigned char)tmp->b;
 		k++;
 	}
 	fprintf(stderr,"fin de debruit_rgb \n");
 }
 
 
-/*
-NEED TO BE FINISHED
-*/
-
 void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr ,int maxIter , int s , int sizeX , int sizeY){
 	
-	int i;
-	//create buffer of Image J (debruit)
+	int i,j,z,k = 0;
+	float coord,rgb;
+	pt_x x , y ;
+	//debruit_rgb(tabPt_x,buf,hs,hr,maxIter,s,sizeX,sizeY);
+	printf("dans segmentation %d \n",buf[3]);
+	
+	/*create buffer of Image J (debruit)*/
 	debruit_rgb(tabPt_x,buf,hs,hr,maxIter,s,sizeX,sizeY);
-	//remplir tableau 2
+	printf(" apres %d\n",buf[3]);
+
+	/*Histograme*/
+	int ***his = (int ***)i_malloc(sizeof(int**) * 256);
+  	for(i = 0 ; i < 256 ; i++){
+    	his[i]=  (int **)i_malloc(sizeof(int*) * 256);
+    	for(j = 0 ; j < 256 ; j++){
+     	 	his[i][j] = (int *)i_malloc(sizeof(int) * 256);
+      		for(z = 0 ; z < 256 ; z++){
+         		his[i][j][z]=0;
+		       }
+    	}
+  	}
+		
 	pt_x* tabPt_x2 = malloc(sizeX* sizeY* 3 *sizeof(pt_x));
+	
 	remplir_rgb(buf,tabPt_x2,sizeX,sizeY);
-	//
 
-
+	printf("START OF LOOP \n");
+	for(i = 0 ; i < sizeX * sizeY ; i++){
+		x = tabPt_x2[i];
+		for(j = 0 ; j < sizeX * sizeY ; j++){
+			y = tabPt_x2[j];
+			coord = distancePointsCoord(x,y);
+			//printf("coord = %f\n",coord);
+			rgb = distancePointsRgb(x,y);
+			//printf("rgb = %f\n",rgb);
+			if(coord < hs &&  rgb < hr){
+				if(his[(int)x.r][(int)x.g][(int)x.b] > his[(int)y.r][(int)y.g][(int)y.b]){
+					buf[k] = x.r;
+					buf[k+1] = x.g;
+					buf[k+2] = x.b;
+				}else{
+					buf[k] = y.r;
+					buf[k+1] = y.g;
+					buf[k+2] = y.b;
+				}		
+			}
+		}
+		k=k+3;
+	}
 }
 
 void affiche_tab(struct pt_x* tabPt_x,int x , int y){
@@ -229,4 +266,24 @@ void affiche_tab(struct pt_x* tabPt_x,int x , int y){
 		printf("%d ) i = %f j = %f r = %f g = %f b= %f \n", i , tabPt_x[i].i , tabPt_x[i].j , tabPt_x[i].r , tabPt_x[i].g , tabPt_x[i].b);
 	}
 	fprintf(stderr,"fin de affiche_tab \n");
+}
+
+
+void calcul_Histogramme(unsigned char *buf, int*** histo , int sizeX , int sizeY){
+	int i,j,k;	
+	k=0;
+	j=0;
+	int r , g , b;
+	while(j < 3*sizeX){
+		i = 0;
+		while( i < 3*sizeY){
+			r = buf[(j*sizeX)+i];
+			g = buf[(j*sizeX)+i+1];
+			b = buf[(j*sizeX)+i+2];
+			histo[r][g][b]++;
+			printf("inside = %d\n", histo[r][g][b]);
+			i = i + 3;
+		}	
+		j = j + 3;
+	}
 }

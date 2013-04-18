@@ -17,14 +17,14 @@ int main( int argc, char **argv) {
   struct image *nf;
   Fort_int lfmt[9];
   unsigned char *buf , *buf2;
-  int sb = 0, i, j;
+  int sb = 0, i, j,z;
   struct pt_x* pt;
   struct pt_x *res;
   struct pt_x * tabPt_x;
 
   float hr , hs;
-  hr = 8;
-  hs = 5;
+  hr = 20;
+  hs = 20;
   /* Initialisation */
   inr_init( argc, argv, version, usage, detail);
 
@@ -66,20 +66,25 @@ int main( int argc, char **argv) {
   }
 
 
+
   /* Traitement */
-  
 
   /*debruit*/
+
   buf2 = (unsigned char*)i_malloc( NDIMX * NDIMY*NDIMV*sizeof(unsigned char));
 
   if(NDIMV == 1){
     debruit_basic(tabPt_x,buf2,hs,hr,1000,1,NDIMX,NDIMY);
   }else{
-    debruit_rgb(tabPt_x,buf2,hs,hr,1000,1,NDIMX,NDIMY);
+    //debruit_rgb(tabPt_x,buf2,hs,hr,1000,1,NDIMX,NDIMY);
   }
+
+  segmentation(tabPt_x , buf2 , hs , hr , 1000 , 1 , NDIMX, NDIMY);
+
 
   /*sauvgarde*/
   
+  printf("sortir \n");
   outfileopt(nom);
   nf = c_image(nom,"c","",lfmt);
   c_ecr(nf,DIMY,buf2);
@@ -87,8 +92,8 @@ int main( int argc, char **argv) {
     /* fermeture image */
   fermnf_( &nf);
 
-
- // i_Free((void*)&buf);
+  //free(&his);
+  i_Free((void*)&buf);
   i_Free((void*)&buf2);
   return 0;
 }

@@ -30,6 +30,9 @@ void affiche_tab(struct pt_x* tabPt_x,int x , int y);
 /*sets the pixel to the values*/
 void setPixel(pt_x *pt , int i , int j , int r , int g , int b);
 
-void remplir_rgbSeg(unsigned char *buf, pt_x* tabPt_x ,int centerX , int centerY , int sizeX , int sizeY);
 
-void getVoisinage(pt_x tabPt_x[] ,int indice, pt_x tabPt_x2[] , int sizeX , int sizeY);
+void getVoisinage(pt_x tabPt_x[] ,int indice, pt_x tabPt_x2[] , int rang , int sizeX , int sizeY);
+
+void calcul_Histogramme(unsigned char *buf, int*** histo , int sizeX , int sizeY);
+
+void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr ,int maxIter , int s , int sizeX , int sizeY);
