@@ -2,36 +2,36 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inrimage/image.h>
-
-
-
+#include "tools.h"
 
 
 /**
 * Fills table of pt_x with buf of an image 256 levels of grey.
 * @param buf buffered used to filled
 * @param tabPt_x table of pt_x that will be filled
-* @param x dim de buf
-* @param y dim de buf
+* @param sizeX dim de buf
+* @param sizeY dim de buf
 */
 
-void remplir_basic(unsigned char *buf , struct pt_x* tabPt_x , int x , int y){
-	fprintf(stderr,"remplir_basic \n");
-
+void remplir_basic(unsigned char *buf , struct pt_x* tabPt_x , int sizeX , int sizeY){
+	if(debug == 1){
+		fprintf(stderr,"remplir_basic \n");
+	}
 	int i , j , k;
 	k=0;
-	for( j=0; j<x; j++){
-	    for( i=0; i<y; i++){
+	for( j=0; j<sizeX; j++){
+	    for( i=0; i<sizeY; i++){
 	      tabPt_x[k].i = i;
 	      tabPt_x[k].j = j;
-	      tabPt_x[k].r = buf[(i*x)+j];
+	      tabPt_x[k].r = buf[(i*sizeX)+j];
 	      tabPt_x[k].g = 0;
 	      tabPt_x[k].b = 0;
 	   	  k++;
 	   	 }
 	}
-
-	fprintf(stderr,"fin de remplir_basic\n");
+	if(debug == 1){
+		fprintf(stderr,"fin de remplir_basic\n");
+	}
 }
 
 /**
@@ -42,25 +42,26 @@ void remplir_basic(unsigned char *buf , struct pt_x* tabPt_x , int x , int y){
 * @param y dim de buf
 */
 
-void remplir_rgb(unsigned char *buf , struct pt_x* tabPt_x , int x , int y){
+void remplir_rgb(unsigned char *buf , struct pt_x* tabPt_x , int sizeX , int sizeY){
 	
-	fprintf(stderr,"remplir_rgb\n");
-	
+	if(debug == 1){
+		fprintf(stderr,"remplir_rgb\n");
+	}
     
 	int i,j,k,indiceX,indiceY;	
 	indiceX=0;
 	indiceY=0;	
 	k=0;
 	j=0;
-	while(j < 3*x){
+	while(j < 3*sizeX){
 		indiceX=0;	
 		i = 0;
-		while( i < 3*y){		
+		while( i < 3*sizeY){		
 			tabPt_x[k].i = indiceX;
 			tabPt_x[k].j = indiceY;
-			tabPt_x[k].r = buf[(j*x)+i];
-			tabPt_x[k].g = buf[(j*x)+i+1];
-			tabPt_x[k].b = buf[(j*x)+i+2];
+			tabPt_x[k].r = buf[(j*sizeX)+i];
+			tabPt_x[k].g = buf[(j*sizeX)+i+1];
+			tabPt_x[k].b = buf[(j*sizeX)+i+2];
 			k++;
 			indiceX++;
 			i = i + 3;
@@ -68,8 +69,9 @@ void remplir_rgb(unsigned char *buf , struct pt_x* tabPt_x , int x , int y){
 		indiceY++;
 		j = j + 3;
 	}
-
-	fprintf(stderr,"fin de remplir_rgb \n");
+	if(debug==1){
+		fprintf(stderr,"fin de remplir_rgb \n");
+	}
 }
 
 
@@ -91,8 +93,19 @@ void setPixel(pt_x *pt , int i , int j , int r , int g , int b){
 	pt->b = b;
 }
 
+/**
+* calcalates the mean shift for the pixel center
+* @param tabPt_x[] table with neighbors of pixel center
+* @param center pixel
+* @param hs variable
+* @param hr variable
+* @param s variable of precision
+* @param sizeX variable of size
+* @param sizeY variable of size
+*/
 
-struct pt_x * mean_shift(struct pt_x tabPt_x[] , struct pt_x centre , float hs , float hr , int maxIter , int s, int sizeX , int sizeY){
+
+struct pt_x * mean_shift(struct pt_x tabPt_x[] , struct pt_x centre , float hs , float hr , int s, int sizeX , int sizeY){
 
 	int i , iDebut , jDebut;
 	float div = 0;
@@ -112,25 +125,27 @@ struct pt_x * mean_shift(struct pt_x tabPt_x[] , struct pt_x centre , float hs ,
 		setPixel(sum,0,0,0,0,0);
 		setPixel(mult,0,0,0,0,0);
 		for(i = 0 ; i < sizeX*sizeY ; i++){
+
 			
-			noyau = noyau_gaussCoord(y->i - tabPt_x[i].i , y->j - tabPt_x[i].j ,hs);	
-			noyau = -noyau * noyau_gaussRgb(y->r - tabPt_x[i].r , y->g - tabPt_x[i].g , y->b - tabPt_x[i].b , hr);			
-			div = div + noyau;	
-			mult_pt(tabPt_x[i],noyau,mult);
-			sum_pt(*mult,sum,sum);
-				
-			}
-			/*if( noyau_coord(y->i - tabPt_x[i].i , y->j - tabPt_x[i].j ,hs) == 1 ){	
+			if(noyau == 1){
+				noyau = noyau_gaussCoord(y->i - tabPt_x[i].i , y->j - tabPt_x[i].j ,hs);	
+				noyau = -noyau * noyau_gaussRgb(y->r - tabPt_x[i].r , y->g - tabPt_x[i].g , y->b - tabPt_x[i].b , hr);			
+				div = div + noyau;	
+				mult_pt(tabPt_x[i],noyau,mult);
+				sum_pt(*mult,sum,sum);		
+			}else{
+				if(noyau_coord(y->i - tabPt_x[i].i , y->j - tabPt_x[i].j ,hs) == 1 ){	
 					noyau = -1 * noyau_rgb(y->r - tabPt_x[i].r , y->g - tabPt_x[i].g , y->b - tabPt_x[i].b , hr);			
 					div = div + noyau;	
 					mult_pt(tabPt_x[i],noyau,mult);
 					sum_pt(*mult,sum,sum);
 				}
-			}*/
+			}
+		}
 		div_pt(*sum,div,&tmp);
 		k++;
 
-	}while (!((k > maxIter) || (moduloPt(tmp,*y) < s)));
+	}while (!( k > max || (moduloPt(tmp,*y) < s)));
 
 	free(sum);
 	free(mult);
@@ -139,14 +154,22 @@ struct pt_x * mean_shift(struct pt_x tabPt_x[] , struct pt_x centre , float hs ,
 	return y;
 }
 
-
-void getVoisinage(pt_x tabPt_x[] ,int indice, pt_x tabPt_x2[] , int rang , int sizeX , int sizeY){
+/**
+* fills table with the neighbors of center pixel picked by 
+* index
+* @param tabPt_x[] table with all pixels from the original image
+* @param indice index of the center pixel
+* @param tabPt_x2[] the table to be filled
+* @param sizeX size of actual image
+* @param sizeY size of actual image 
+*/
+void getVoisinage(pt_x tabPt_x[] ,int indice, pt_x tabPt_x2[] ,int sizeX , int sizeY){
   int i,j;
-  int ix = tabPt_x[indice].i - rang;
-  int iy = tabPt_x[indice].j - rang;
+  int ix = tabPt_x[indice].i - VOSIN;
+  int iy = tabPt_x[indice].j - VOSIN;
   int ll = 0;
-  for(j = iy ; j <= tabPt_x[indice].j + rang ; j++){
-    for(i = ix ; i  <= tabPt_x[indice].i + rang  ; i++){
+  for(j = iy ; j <= tabPt_x[indice].j + VOSIN ; j++){
+    for(i = ix ; i  <= tabPt_x[indice].i + VOSIN  ; i++){
       int index = (j * sizeX) + i;
       if(index < 0 || index >= sizeX * sizeY)
       	tabPt_x2[ll] = tabPt_x[indice];
@@ -157,9 +180,20 @@ void getVoisinage(pt_x tabPt_x[] ,int indice, pt_x tabPt_x2[] , int rang , int s
   } 
 }
 
-
-void debruit_basic(struct pt_x* tabPt_x , unsigned char *buf , float hs , float hr , int maxIter , int s, int sizeX , int sizeY){
-	fprintf(stderr,"debruit_basic \n");
+/**
+* removes noise from a image of 256 levels of grey
+* @param tabPt_x[] table with pixels to be denoised
+* @param *buf buffer to be filled with the new values
+* @param hs 
+* @param hr
+* @param s variable of precision
+* @param sizeX size of actual image
+* @param sizeY size of actual image 
+*/
+void debruit_basic(struct pt_x* tabPt_x , unsigned char *buf , float hs , float hr , int s, int sizeX , int sizeY){
+	if(debug == 1){
+		fprintf(stderr,"debruit_basic");
+	}
 	struct pt_x *res;
 	int i ,x , y ,value;
 	
@@ -167,7 +201,7 @@ void debruit_basic(struct pt_x* tabPt_x , unsigned char *buf , float hs , float 
 	y = 0;
 	
 	for(i = 0 ; i < sizeX * sizeY ; i++){
-	    res = mean_shift(tabPt_x , tabPt_x[i] , hs  , hr , maxIter , s ,sizeX , sizeY);
+	    res = mean_shift(tabPt_x , tabPt_x[i] , hs  , hr , s ,sizeX , sizeY);
 	    value = (int)res->r;
 	    buf[x * sizeX + y]=value;     
 	    x++;
@@ -178,14 +212,28 @@ void debruit_basic(struct pt_x* tabPt_x , unsigned char *buf , float hs , float 
     	}
 
 
-  	}	
- 	fprintf(stderr,"Fin debruit_basic \n");
+  	}
+  	if(debug == 1){	
+ 		fprintf(stderr,"Fin debruit_basic \n");
+ 	}
 }
 
+/**
+* removes noise from a rgb image
+* @param tabPt_x[] table with pixels to be denoised
+* @param *buf buffer to be filled with the new values
+* @param hs 
+* @param hr
+* @param s variable of precision
+* @param sizeX size of actual image
+* @param sizeY size of actual image 
+*/
 
-void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr , int maxIter , int s , int sizeX , int sizeY){
-	fprintf(stderr,"debruit_rgb \n");
+void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr , int s , int sizeX , int sizeY){
 	
+	if(debug == 1){
+		fprintf(stderr,"debruit_rgb  \n");
+	}
 	struct pt_x *tmp , *tmp2;
 	int i , tmpi , tmpj;
 	int x , y , j ,k;
@@ -193,32 +241,47 @@ void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr 
 	y = 0;
 	j = 0;
 	k=0;
-	tmp2 = malloc(7*7 *sizeof(pt_x));
+	tmp2 = malloc(pow(VOSIN*2+1,2) *sizeof(pt_x));
 	for(i = 0; i < sizeX*sizeY  ; i++){
-		getVoisinage(tabPt_x,i,tmp2,3,sizeX,sizeY);
-		tmp = mean_shift(tmp2,tabPt_x[i],hs,hr,maxIter,s,5,5);
+		getVoisinage(tabPt_x,i,tmp2,sizeX,sizeY);
+		tmp = mean_shift(tmp2,tabPt_x[i],hs,hr,s,VOSIN*2+1,VOSIN*2+1);
 		buf[(3 * k)]   = (unsigned char)tmp->r;	
 		buf[(3 * k)+1] = (unsigned char)tmp->g;
 		buf[(3 * k)+2] = (unsigned char)tmp->b;
 		k++;
 	}
-	fprintf(stderr,"fin de debruit_rgb \n");
+	if(debug == 1){
+		fprintf(stderr,"fin de debruit_rgb \n");
+	}
 }
 
+/**
+* segmenation of an image rgb
+* @param tabPt_x[] table with pixels to be segmentated
+* @param *buf buffer to be filled with the new values
+* @param hs 
+* @param hr
+* @param s variable of precision
+* @param sizeX size of actual image
+* @param sizeY size of actual image 
+*/
 
-void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr ,int maxIter , int s , int sizeX , int sizeY){
+void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr , int s , int sizeX , int sizeY){
 	
+	if(debug == 1){
+		fprintf(stderr, "debut segmentation\n");
+	}
 	int i,j,z,k = 0;
 	float coord,rgb;
 	pt_x x , y ;
-	//debruit_rgb(tabPt_x,buf,hs,hr,maxIter,s,sizeX,sizeY);
-	printf("dans segmentation %d \n",buf[3]);
+
+	unsigned char *buftmp = (unsigned char*)i_malloc( sizeX * sizeY* 3 *sizeof(unsigned char));
 	
 	/*create buffer of Image J (debruit)*/
-	debruit_rgb(tabPt_x,buf,hs,hr,maxIter,s,sizeX,sizeY);
-	printf(" apres %d\n",buf[3]);
+	debruit_rgb(tabPt_x,buftmp,hs,hr,s,sizeX,sizeY);
 
 	/*Histograme*/
+	
 	int ***his = (int ***)i_malloc(sizeof(int**) * 256);
   	for(i = 0 ; i < 256 ; i++){
     	his[i]=  (int **)i_malloc(sizeof(int*) * 256);
@@ -229,20 +292,18 @@ void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr ,int 
 		       }
     	}
   	}
-		
-	pt_x* tabPt_x2 = malloc(sizeX* sizeY* 3 *sizeof(pt_x));
-	
-	remplir_rgb(buf,tabPt_x2,sizeX,sizeY);
 
-	printf("START OF LOOP \n");
+	calcul_Histogramme(buf,his,sizeX,sizeY);
+
+	pt_x* tabPt_x2 = malloc(sizeX* sizeY* 3 *sizeof(pt_x));
+	remplir_rgb(buftmp,tabPt_x2,sizeX,sizeY);
+
 	for(i = 0 ; i < sizeX * sizeY ; i++){
 		x = tabPt_x2[i];
 		for(j = 0 ; j < sizeX * sizeY ; j++){
 			y = tabPt_x2[j];
 			coord = distancePointsCoord(x,y);
-			//printf("coord = %f\n",coord);
 			rgb = distancePointsRgb(x,y);
-			//printf("rgb = %f\n",rgb);
 			if(coord < hs &&  rgb < hr){
 				if(his[(int)x.r][(int)x.g][(int)x.b] > his[(int)y.r][(int)y.g][(int)y.b]){
 					buf[k] = x.r;
@@ -256,6 +317,10 @@ void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr ,int 
 			}
 		}
 		k=k+3;
+	}
+	
+	if(debug == 1){
+	fprintf(stderr, "Fin de segmentation\n");
 	}
 }
 
@@ -281,7 +346,6 @@ void calcul_Histogramme(unsigned char *buf, int*** histo , int sizeX , int sizeY
 			g = buf[(j*sizeX)+i+1];
 			b = buf[(j*sizeX)+i+2];
 			histo[r][g][b]++;
-			printf("inside = %d\n", histo[r][g][b]);
 			i = i + 3;
 		}	
 		j = j + 3;
