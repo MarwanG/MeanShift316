@@ -62,6 +62,8 @@ void remplir_rgb(unsigned char *buf , struct pt_x* tabPt_x , int sizeX , int siz
 			tabPt_x[k].r = buf[(j*sizeX)+i];
 			tabPt_x[k].g = buf[(j*sizeX)+i+1];
 			tabPt_x[k].b = buf[(j*sizeX)+i+2];
+			if(debug)
+				fprintf(stderr, "i = %d\n",i);
 			k++;
 			indiceX++;
 			i = i + 3;
@@ -249,6 +251,9 @@ void debruit_rgb(struct pt_x* tabPt_x , unsigned char *buf ,float hs , float hr 
 		buf[(3 * k)+1] = (unsigned char)tmp->g;
 		buf[(3 * k)+2] = (unsigned char)tmp->b;
 		k++;
+		if(debug){
+			fprintf(stderr, "i = %d\n",i);
+		}
 	}
 	if(debug == 1){
 		fprintf(stderr,"fin de debruit_rgb \n");
@@ -316,6 +321,8 @@ void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr , int
 				}		
 			}
 		}
+		if(debug == 1)
+			fprintf(stderr, "i = %d\n",i);
 		k=k+3;
 	}
 	
@@ -324,6 +331,12 @@ void segmentation(pt_x* tabPt_x , unsigned char *buf , float hs , float hr , int
 	}
 }
 
+/**
+* prints the values of the table passed in the parameters
+* @param tabPt_x table that will be printed
+* @param x size of the table
+* @param y size of the table
+*/
 void affiche_tab(struct pt_x* tabPt_x,int x , int y){
 	fprintf(stderr,"debut de affiche_tab \n");
 	int i;
@@ -333,6 +346,14 @@ void affiche_tab(struct pt_x* tabPt_x,int x , int y){
 	fprintf(stderr,"fin de affiche_tab \n");
 }
 
+
+/**
+* calculate the histograme for the buffer passed in the parameters
+* @param buf pointer to the buffer that will be used in calculation
+* @param histo the table that will be filled
+* @param sizeX size of the buffer
+* @param sizeY size of the buffer
+*/
 
 void calcul_Histogramme(unsigned char *buf, int*** histo , int sizeX , int sizeY){
 	int i,j,k;	
