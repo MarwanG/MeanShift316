@@ -116,7 +116,7 @@ int main( int argc, char **argv) {
       debruit_rgb(tabPt_x,buf2,hs,hr,1,NDIMX,NDIMY);
     }
   }else{
-    segmentation(tabPt_x , buf2 , hs , hr , 1 , NDIMX, NDIMY);
+    segmentation(tabPt_x , buf2 , hs , hr , 0.1 , NDIMX, NDIMY);
   }
   
   /*sauvgarde*/
